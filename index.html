@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Mileage" />
-  <title>ACF Mileage Tracker</title>
+  <title>Mileage Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -15,10 +15,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; background: #0f1923; }
     #root { height: 100%; }
-
     .root { font-family: 'DM Sans', sans-serif; max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; background: #0f1923; display: flex; flex-direction: column; color: #e8edf2; }
-    .mono { font-family: 'DM Mono', monospace; }
-
     .header { background: #0f1923; padding: 52px 18px 16px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e2d3d; }
     .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .header-icon { width: 34px; height: 34px; background: #e84545; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
@@ -34,33 +31,28 @@
     .sum-value { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; line-height: 1; }
     .sum-value-amber { color: #f5c842; }
     .sum-value-green { color: #3ed670; }
-
     .tabs { display: flex; background: #0f1923; border-bottom: 1px solid #1e2d3d; position: sticky; top: 145px; z-index: 9; }
     .tab-btn { flex: 1; padding: 12px 0; border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: #4a6785; border-bottom: 2px solid transparent; transition: all 0.15s; }
     .tab-btn.active { color: #e84545; border-bottom-color: #e84545; font-weight: 700; }
-
     .content { flex: 1; padding: 14px 14px 100px; overflow-y: auto; }
     .empty-state { text-align: center; color: #2e4a5f; margin-top: 70px; font-size: 15px; line-height: 1.8; }
     .empty-icon { font-size: 40px; margin-bottom: 12px; }
-
     .week-hdr { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin: 16px 0 6px; border-left: 3px solid #e84545; }
     .week-hdr:first-child { margin-top: 4px; }
     .week-hdr-label { font-size: 12px; font-weight: 700; color: #7a9bb5; }
     .week-hdr-total { font-family: 'DM Mono', monospace; font-size: 12px; color: #e84545; }
-
-    .card { display: flex; align-items: center; background: #141f2b; border: 1px solid #1e2d3d; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; gap: 12px; transition: opacity 0.2s; }
+    .card { display: flex; align-items: center; background: #141f2b; border: 1px solid #1e2d3d; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; gap: 10px; transition: opacity 0.2s; }
     .card.reported { opacity: 0.45; border-color: #152515; }
     .card-body { flex: 1; min-width: 0; }
     .card-date { font-size: 10px; color: #4a6785; font-weight: 500; letter-spacing: 0.3px; margin-bottom: 3px; }
     .card-job { font-size: 14px; font-weight: 600; color: #d0dce8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
     .card-miles { font-family: 'DM Mono', monospace; font-size: 13px; color: #2e75b6; }
     .card-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-    .check-btn { width: 38px; height: 38px; border-radius: 10px; border: 1.5px solid #2e4a5f; background: transparent; font-size: 16px; cursor: pointer; color: #2e4a5f; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
-    .check-btn.done { background: #0f2e18; border-color: #1a5c2a; color: #3ed670; }
-    .del-btn { width: 38px; height: 38px; border-radius: 10px; border: none; background: transparent; color: #3a2020; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
+    .icon-btn { width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid #2e4a5f; background: transparent; font-size: 15px; cursor: pointer; color: #2e4a5f; display: flex; align-items: center; justify-content: center; }
+    .icon-btn.check.done { background: #0f2e18; border-color: #1a5c2a; color: #3ed670; }
+    .icon-btn.edit { border-color: #2e4a5f; color: #4a6785; font-size: 13px; }
+    .icon-btn.del { border-color: transparent; color: #3a2020; font-size: 12px; }
     .fab { position: fixed; bottom: 28px; right: 20px; width: 58px; height: 58px; border-radius: 16px; background: #e84545; color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 8px 24px rgba(232,69,69,0.4); z-index: 20; display: flex; align-items: center; justify-content: center; font-weight: 300; }
-
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 30; display: flex; align-items: flex-end; }
     .modal { background: #141f2b; border-radius: 20px 20px 0 0; padding: 24px 20px 44px; width: 100%; max-width: 480px; margin: 0 auto; border-top: 1px solid #1e2d3d; }
     .modal-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
@@ -69,8 +61,7 @@
     .field-label { font-size: 11px; font-weight: 700; color: #4a6785; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; margin-top: 16px; display: block; }
     .field-input { width: 100%; padding: 12px 14px; background: #0f1923; border: 1px solid #1e2d3d; border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; color: #e8edf2; outline: none; }
     .field-input:focus { border-color: #e84545; }
-    .add-btn { width: 100%; padding: 15px; background: #e84545; color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 24px; font-family: 'DM Sans', sans-serif; }
-
+    .submit-btn { width: 100%; padding: 15px; background: #e84545; color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 24px; font-family: 'DM Sans', sans-serif; }
     .week-card { background: #141f2b; border: 1px solid #1e2d3d; border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
     .week-card-hdr { padding: 12px 16px; background: #0f1923; border-bottom: 1px solid #1e2d3d; }
     .week-card-title { font-size: 12px; font-weight: 700; color: #7a9bb5; }
@@ -85,14 +76,13 @@
     .row-pay { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; min-width: 64px; text-align: right; }
     .row-pay-green { color: #3ed670; }
     .row-pay-muted { color: #f5c842; }
-
-    .del-confirm { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 40; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .del-box { background: #141f2b; border: 1px solid #1e2d3d; border-radius: 16px; padding: 24px 20px; width: 100%; max-width: 320px; text-align: center; }
-    .del-box-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .del-box-sub { font-size: 13px; color: #4a6785; margin-bottom: 22px; }
-    .del-actions { display: flex; gap: 10px; }
-    .del-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #1e2d3d; background: transparent; color: #7a9bb5; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-    .del-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #e84545; color: white; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 40; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .confirm-box { background: #141f2b; border: 1px solid #1e2d3d; border-radius: 16px; padding: 24px 20px; width: 100%; max-width: 320px; text-align: center; }
+    .confirm-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .confirm-sub { font-size: 13px; color: #4a6785; margin-bottom: 22px; }
+    .confirm-actions { display: flex; gap: 10px; }
+    .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #1e2d3d; background: transparent; color: #7a9bb5; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+    .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #e84545; color: white; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -100,7 +90,7 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
     const RATE = 0.725;
-    const STORAGE_KEY = "acf-mileage-trips";
+    const STORAGE_KEY = "mileage-trips-v1";
 
     const todayStr = () => new Date().toISOString().split("T")[0];
 
@@ -122,9 +112,36 @@
     }
 
     function fmtDate(ds) {
-      return new Date(ds + "T12:00:00").toLocaleDateString("en-US", {
-        weekday: "short", month: "short", day: "numeric",
-      });
+      return new Date(ds + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    }
+
+    function TripForm({ initial, onSubmit, onClose, title, btnLabel }) {
+      const [form, setForm] = useState(initial);
+      const handle = () => {
+        const miles = parseFloat(form.miles);
+        if (!form.job.trim() || !miles || miles <= 0) return;
+        onSubmit({ ...form, miles });
+      };
+      return (
+        <div className="overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-hdr">
+              <span className="modal-title">{title}</span>
+              <button className="modal-close" onClick={onClose}>✕</button>
+            </div>
+            <label className="field-label">Date</label>
+            <input className="field-input" type="date" value={form.date}
+              onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+            <label className="field-label">Job Name</label>
+            <input className="field-input" type="text" value={form.job} placeholder="e.g. Smith Residence"
+              onChange={e => setForm(f => ({ ...f, job: e.target.value }))} />
+            <label className="field-label">Miles</label>
+            <input className="field-input" type="number" inputMode="decimal" value={form.miles} placeholder="0.0"
+              onChange={e => setForm(f => ({ ...f, miles: e.target.value }))} />
+            <button className="submit-btn" onClick={handle}>{btnLabel}</button>
+          </div>
+        </div>
+      );
     }
 
     function App() {
@@ -133,20 +150,25 @@
       });
       const [tab, setTab] = useState("log");
       const [showAdd, setShowAdd] = useState(false);
-      const [form, setForm] = useState({ date: todayStr(), job: "", miles: "" });
+      const [editTrip, setEditTrip] = useState(null);
       const [delConfirm, setDelConfirm] = useState(null);
 
       useEffect(() => {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); } catch (_) {}
       }, [trips]);
 
-      const addTrip = () => {
-        const miles = parseFloat(form.miles);
-        if (!form.job.trim() || !miles || miles <= 0) return;
-        const t = { id: Date.now().toString(), date: form.date, job: form.job.trim(), miles, reported: false, weekStart: getWeekStart(form.date) };
+      const addTrip = ({ date, job, miles }) => {
+        const t = { id: Date.now().toString(), date, job, miles, reported: false, weekStart: getWeekStart(date) };
         setTrips(p => [...p, t].sort((a, b) => b.date.localeCompare(a.date)));
-        setForm({ date: todayStr(), job: "", miles: "" });
         setShowAdd(false);
+      };
+
+      const saveEdit = ({ date, job, miles }) => {
+        setTrips(p => p.map(t => t.id === editTrip.id
+          ? { ...t, date, job, miles, weekStart: getWeekStart(date) }
+          : t
+        ).sort((a, b) => b.date.localeCompare(a.date)));
+        setEditTrip(null);
       };
 
       const toggle = (id) => setTrips(p => p.map(t => t.id === id ? { ...t, reported: !t.reported } : t));
@@ -169,7 +191,7 @@
               <div className="header-icon">🚗</div>
               <div>
                 <div className="header-title">Mileage Tracker</div>
-                <div className="header-sub">ACF BUILT · $0.725 / MI</div>
+                <div className="header-sub">$0.725 / MI</div>
               </div>
             </div>
             <div className="summary-row">
@@ -207,10 +229,11 @@
                           <div className="card-miles">{t.miles.toFixed(1)} mi · ${(t.miles * RATE).toFixed(2)}</div>
                         </div>
                         <div className="card-actions">
-                          <button className={`check-btn ${t.reported ? "done" : ""}`} onClick={() => toggle(t.id)}>
+                          <button className={`icon-btn check ${t.reported ? "done" : ""}`} onClick={() => toggle(t.id)}>
                             {t.reported ? "✓" : "○"}
                           </button>
-                          <button className="del-btn" onClick={() => setDelConfirm(t.id)}>✕</button>
+                          <button className="icon-btn edit" onClick={() => setEditTrip(t)}>✎</button>
+                          <button className="icon-btn del" onClick={() => setDelConfirm(t.id)}>✕</button>
                         </div>
                       </div>
                     ))}
@@ -255,36 +278,33 @@
           )}
 
           {showAdd && (
-            <div className="overlay" onClick={e => e.target === e.currentTarget && setShowAdd(false)}>
-              <div className="modal">
-                <div className="modal-hdr">
-                  <span className="modal-title">Add Trip</span>
-                  <button className="modal-close" onClick={() => setShowAdd(false)}>✕</button>
-                </div>
-                <label className="field-label">Date</label>
-                <input className="field-input" type="date" value={form.date}
-                  onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-                <label className="field-label">Job Name</label>
-                <input className="field-input" type="text" value={form.job}
-                  placeholder="e.g. Smith Residence"
-                  onChange={e => setForm(f => ({ ...f, job: e.target.value }))} />
-                <label className="field-label">Miles</label>
-                <input className="field-input" type="number" inputMode="decimal"
-                  value={form.miles} placeholder="0.0"
-                  onChange={e => setForm(f => ({ ...f, miles: e.target.value }))} />
-                <button className="add-btn" onClick={addTrip}>Add Trip</button>
-              </div>
-            </div>
+            <TripForm
+              title="Add Trip"
+              btnLabel="Add Trip"
+              initial={{ date: todayStr(), job: "", miles: "" }}
+              onSubmit={addTrip}
+              onClose={() => setShowAdd(false)}
+            />
+          )}
+
+          {editTrip && (
+            <TripForm
+              title="Edit Trip"
+              btnLabel="Save Changes"
+              initial={{ date: editTrip.date, job: editTrip.job, miles: String(editTrip.miles) }}
+              onSubmit={saveEdit}
+              onClose={() => setEditTrip(null)}
+            />
           )}
 
           {delConfirm && (
-            <div className="del-confirm">
-              <div className="del-box">
-                <div className="del-box-title">Delete this trip?</div>
-                <div className="del-box-sub">This can't be undone.</div>
-                <div className="del-actions">
-                  <button className="del-cancel" onClick={() => setDelConfirm(null)}>Cancel</button>
-                  <button className="del-ok" onClick={() => del(delConfirm)}>Delete</button>
+            <div className="confirm-overlay">
+              <div className="confirm-box">
+                <div className="confirm-title">Delete this trip?</div>
+                <div className="confirm-sub">This can't be undone.</div>
+                <div className="confirm-actions">
+                  <button className="confirm-cancel" onClick={() => setDelConfirm(null)}>Cancel</button>
+                  <button className="confirm-ok" onClick={() => del(delConfirm)}>Delete</button>
                 </div>
               </div>
             </div>
