@@ -21,6 +21,8 @@
     .header-icon { width: 34px; height: 34px; background: #e84545; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
     .header-sub { font-size: 11px; color: #4a6785; font-weight: 500; letter-spacing: 0.5px; }
+    .header-right { margin-left: auto; }
+    .settings-btn { background: none; border: none; color: #4a6785; font-size: 20px; cursor: pointer; padding: 4px; }
     .summary-row { display: flex; gap: 10px; }
     .sum-card { flex: 1; border-radius: 10px; padding: 10px 14px; }
     .sum-card-amber { background: linear-gradient(135deg, #2a1f0a, #3d2d0f); border: 1px solid #5c420f; }
@@ -83,14 +85,35 @@
     .confirm-actions { display: flex; gap: 10px; }
     .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #1e2d3d; background: transparent; color: #7a9bb5; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
     .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #e84545; color: white; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+    /* PIN screen */
+    .pin-screen { position: fixed; inset: 0; background: #0f1923; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 32px; max-width: 480px; margin: 0 auto; }
+    .pin-icon { font-size: 40px; margin-bottom: 16px; }
+    .pin-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .pin-sub { font-size: 13px; color: #4a6785; margin-bottom: 40px; text-align: center; line-height: 1.5; }
+    .pin-dots { display: flex; gap: 16px; margin-bottom: 48px; }
+    .pin-dot { width: 16px; height: 16px; border-radius: 8px; border: 2px solid #2e4a5f; background: transparent; transition: all 0.15s; }
+    .pin-dot.filled { background: #e84545; border-color: #e84545; }
+    .pin-dot.error { background: #e84545; border-color: #e84545; animation: shake 0.3s; }
+    .pin-error { font-size: 13px; color: #e84545; margin-bottom: 16px; height: 18px; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 280px; }
+    .key { height: 68px; border-radius: 14px; border: 1px solid #1e2d3d; background: #141f2b; color: #e8edf2; font-size: 22px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; transition: background 0.1s; }
+    .key:active { background: #1e2d3d; }
+    .key.del { font-size: 18px; color: #4a6785; }
+    .key.empty { border: none; background: transparent; cursor: default; }
+    .pin-link { margin-top: 28px; font-size: 13px; color: #4a6785; background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: underline; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useCallback } = React;
     const RATE = 0.725;
     const STORAGE_KEY = "mileage-trips-v1";
+    const PIN_KEY = "mileage-pin";
+    const UNLOCK_KEY = "mileage-unlocked-until";
+    const UNLOCK_HOURS = 24;
 
     const todayStr = () => new Date().toISOString().split("T")[0];
 
@@ -115,6 +138,92 @@
       return new Date(ds + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
     }
 
+    // ── PIN Screen ───────────────────────────────────────────
+    function PinScreen({ mode, onSuccess, onForgot }) {
+      const [digits, setDigits] = useState([]);
+      const [confirm, setConfirm] = useState(null);
+      const [error, setError] = useState("");
+      const [shake, setShake] = useState(false);
+
+      const step = mode === "setup"
+        ? (confirm === null ? "Choose a 6-digit PIN" : "Confirm your PIN")
+        : "Enter your PIN";
+
+      const sub = mode === "setup"
+        ? (confirm === null ? "You'll only need to set this once." : "Re-enter your PIN to confirm.")
+        : "Unlock your mileage tracker.";
+
+      const triggerError = (msg) => {
+        setError(msg);
+        setShake(true);
+        setTimeout(() => { setDigits([]); setShake(false); }, 600);
+      };
+
+      const handleKey = (k) => {
+        if (digits.length >= 6) return;
+        const next = [...digits, k];
+        setDigits(next);
+        setError("");
+
+        if (next.length === 6) {
+          const pin = next.join("");
+          if (mode === "setup") {
+            if (confirm === null) {
+              setTimeout(() => { setConfirm(pin); setDigits([]); }, 200);
+            } else {
+              if (pin === confirm) {
+                localStorage.setItem(PIN_KEY, pin);
+                localStorage.setItem(UNLOCK_KEY, Date.now() + UNLOCK_HOURS * 3600000);
+                onSuccess();
+              } else {
+                setConfirm(null);
+                triggerError("PINs didn't match. Try again.");
+              }
+            }
+          } else {
+            const stored = localStorage.getItem(PIN_KEY);
+            if (pin === stored) {
+              localStorage.setItem(UNLOCK_KEY, Date.now() + UNLOCK_HOURS * 3600000);
+              onSuccess();
+            } else {
+              triggerError("Incorrect PIN. Try again.");
+            }
+          }
+        }
+      };
+
+      const handleDel = () => setDigits(d => d.slice(0, -1));
+
+      const keys = ["1","2","3","4","5","6","7","8","9","","0","del"];
+
+      return (
+        <div className="pin-screen">
+          <div className="pin-icon">🔒</div>
+          <div className="pin-title">{step}</div>
+          <div className="pin-sub">{sub}</div>
+          <div className="pin-dots">
+            {[0,1,2,3,4,5].map(i => (
+              <div key={i} className={`pin-dot ${digits.length > i ? (shake ? "error" : "filled") : ""}`} />
+            ))}
+          </div>
+          <div className="pin-error">{error}</div>
+          <div className="keypad">
+            {keys.map((k, i) => (
+              k === "del"
+                ? <button key={i} className="key del" onClick={handleDel}>⌫</button>
+                : k === ""
+                  ? <div key={i} className="key empty" />
+                  : <button key={i} className="key" onClick={() => handleKey(k)}>{k}</button>
+            ))}
+          </div>
+          {mode === "unlock" && (
+            <button className="pin-link" onClick={onForgot}>Forgot PIN?</button>
+          )}
+        </div>
+      );
+    }
+
+    // ── Trip Form ────────────────────────────────────────────
     function TripForm({ initial, onSubmit, onClose, title, btnLabel }) {
       const [form, setForm] = useState(initial);
       const handle = () => {
@@ -144,7 +253,15 @@
       );
     }
 
+    // ── Main App ─────────────────────────────────────────────
     function App() {
+      const pinSet = !!localStorage.getItem(PIN_KEY);
+      const unlockedUntil = parseInt(localStorage.getItem(UNLOCK_KEY) || "0");
+      const isUnlocked = Date.now() < unlockedUntil;
+
+      const [screen, setScreen] = useState(
+        !pinSet ? "setup" : isUnlocked ? "app" : "lock"
+      );
       const [trips, setTrips] = useState(() => {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
       });
@@ -152,10 +269,19 @@
       const [showAdd, setShowAdd] = useState(false);
       const [editTrip, setEditTrip] = useState(null);
       const [delConfirm, setDelConfirm] = useState(null);
+      const [showChangePIN, setShowChangePIN] = useState(false);
 
       useEffect(() => {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); } catch (_) {}
       }, [trips]);
+
+      const handleForgotPin = () => {
+        if (window.confirm("Reset PIN? Your trip data will be kept.")) {
+          localStorage.removeItem(PIN_KEY);
+          localStorage.removeItem(UNLOCK_KEY);
+          setScreen("setup");
+        }
+      };
 
       const addTrip = ({ date, job, miles }) => {
         const t = { id: Date.now().toString(), date, job, miles, reported: false, weekStart: getWeekStart(date) };
@@ -184,6 +310,9 @@
       });
       const weekKeys = Object.keys(weekMap).sort((a, b) => b.localeCompare(a));
 
+      if (screen === "setup") return <PinScreen mode="setup" onSuccess={() => setScreen("app")} />;
+      if (screen === "lock") return <PinScreen mode="unlock" onSuccess={() => setScreen("app")} onForgot={handleForgotPin} />;
+
       return (
         <div className="root">
           <div className="header">
@@ -192,6 +321,9 @@
               <div>
                 <div className="header-title">Mileage Tracker</div>
                 <div className="header-sub">$0.725 / MI</div>
+              </div>
+              <div className="header-right">
+                <button className="settings-btn" onClick={() => setShowChangePIN(true)} title="Change PIN">⚙️</button>
               </div>
             </div>
             <div className="summary-row">
@@ -229,9 +361,7 @@
                           <div className="card-miles">{t.miles.toFixed(1)} mi · ${(t.miles * RATE).toFixed(2)}</div>
                         </div>
                         <div className="card-actions">
-                          <button className={`icon-btn check ${t.reported ? "done" : ""}`} onClick={() => toggle(t.id)}>
-                            {t.reported ? "✓" : "○"}
-                          </button>
+                          <button className={`icon-btn check ${t.reported ? "done" : ""}`} onClick={() => toggle(t.id)}>{t.reported ? "✓" : "○"}</button>
                           <button className="icon-btn edit" onClick={() => setEditTrip(t)}>✎</button>
                           <button className="icon-btn del" onClick={() => setDelConfirm(t.id)}>✕</button>
                         </div>
@@ -273,29 +403,10 @@
             )}
           </div>
 
-          {tab === "log" && (
-            <button className="fab" onClick={() => setShowAdd(true)}>+</button>
-          )}
+          {tab === "log" && <button className="fab" onClick={() => setShowAdd(true)}>+</button>}
 
-          {showAdd && (
-            <TripForm
-              title="Add Trip"
-              btnLabel="Add Trip"
-              initial={{ date: todayStr(), job: "", miles: "" }}
-              onSubmit={addTrip}
-              onClose={() => setShowAdd(false)}
-            />
-          )}
-
-          {editTrip && (
-            <TripForm
-              title="Edit Trip"
-              btnLabel="Save Changes"
-              initial={{ date: editTrip.date, job: editTrip.job, miles: String(editTrip.miles) }}
-              onSubmit={saveEdit}
-              onClose={() => setEditTrip(null)}
-            />
-          )}
+          {showAdd && <TripForm title="Add Trip" btnLabel="Add Trip" initial={{ date: todayStr(), job: "", miles: "" }} onSubmit={addTrip} onClose={() => setShowAdd(false)} />}
+          {editTrip && <TripForm title="Edit Trip" btnLabel="Save Changes" initial={{ date: editTrip.date, job: editTrip.job, miles: String(editTrip.miles) }} onSubmit={saveEdit} onClose={() => setEditTrip(null)} />}
 
           {delConfirm && (
             <div className="confirm-overlay">
@@ -305,6 +416,19 @@
                 <div className="confirm-actions">
                   <button className="confirm-cancel" onClick={() => setDelConfirm(null)}>Cancel</button>
                   <button className="confirm-ok" onClick={() => del(delConfirm)}>Delete</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showChangePIN && (
+            <div className="confirm-overlay">
+              <div className="confirm-box">
+                <div className="confirm-title">⚙️ Settings</div>
+                <div className="confirm-sub" style={{marginBottom: 16}}>Change your PIN?</div>
+                <div className="confirm-actions">
+                  <button className="confirm-cancel" onClick={() => setShowChangePIN(false)}>Cancel</button>
+                  <button className="confirm-ok" onClick={() => { localStorage.removeItem(PIN_KEY); setShowChangePIN(false); setScreen("setup"); }}>Change PIN</button>
                 </div>
               </div>
             </div>
